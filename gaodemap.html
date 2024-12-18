@@ -5,10 +5,10 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
     <style type="text/css">
-        #container {width: 100%;height: 100%;overflow: hidden;margin:0;font-family:"微软雅黑";}
-        header{margin: 5px auto;font-size: 16px;}
-            .typein{width: 90px;height: 16px;font-size: 16px;}
-            .btn{width: 60px;height: 30px;font-size: 16px;}
+        #container {width: 100%; height: 100%; overflow: hidden; margin: 0; font-family: "微软雅黑";}
+        header{margin: 5px auto; font-size: 16px;}
+        .typein {width: 90px; height: 16px; font-size: 16px;}
+        .btn {width: 60px; height: 30px; font-size: 16px;}
         body, html {
             width: 100%;
             height: 100%;
@@ -18,8 +18,8 @@
             width: 100%;
             height: 100%;
         }
-    </style>
-    <style type="text/css">
+
+        /* 控制面板样式 */
         #panel {
             position: fixed;
             background-color: white;
@@ -28,23 +28,94 @@
             top: 10px;
             right: 10px;
             width: 280px;
+            border: 1px solid #ddd;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            display: none; /* 初始时隐藏面板 */
+            z-index: 1000;
+            transition: all 0.3s ease-in-out;
         }
+
         #panel .amap-call {
             background-color: #009cf9;
             border-top-left-radius: 4px;
-   	        border-top-right-radius: 4px;
+            border-top-right-radius: 4px;
         }
+
         #panel .amap-lib-driving {
-	        border-bottom-left-radius: 4px;
-   	        border-bottom-right-radius: 4px;
+            border-bottom-left-radius: 4px;
+            border-bottom-right-radius: 4px;
             overflow: hidden;
         }
+
+        /* 展开时面板的样式 */
+        #panel.expanded {
+            display: block;
+            right: 0px;
+            bottom: 0px;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* 控制按钮样式 */
+        #togglePanelButton {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #009cf9;
+            color: white;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 999;
+        }
+
+        #iframeContainer {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* 最下方输入框和提交按钮样式 */
+        #footerInput {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #f9f9f9;
+            padding: 10px;
+            box-shadow: 0px -2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #footerInput input {
+            width: 200px;
+            height: 30px;
+            font-size: 16px;
+        }
+
+        #footerInput button {
+            height: 36px;
+            padding: 0 20px;
+            font-size: 16px;
+            background-color: #009cf9;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
     </style>
+
     <script type="text/javascript">
         window._AMapSecurityConfig = {
-          securityJsCode: "2a37818a30f4cd5df9d60493d7fc84a8",
+            securityJsCode: "2a37818a30f4cd5df9d60493d7fc84a8",
         };
     </script>
+
     <link rel="stylesheet" href="https://a.amap.com/jsapi_demos/static/demo-center/css/demo-center.css" />
     <script src="https://a.amap.com/jsapi_demos/static/demo-center/js/demoutils.js"></script>
     <script type="text/javascript" src="https://webapi.amap.com/maps?v=1.4.15&key=8077720f68f1002d4d1c8668f2714967&plugin=AMap.Driving"></script>
@@ -58,67 +129,87 @@
         <label for="zhongdian">终点:<input type="text" id="zhongdian" placeholder="请输入终点" class="typein"/></label>
         <label for="city">城市:<input type="text" id="city" placeholder="请输入城市" class="typein"/></label>
         <input type="button" class="btn" id="result" value="查询" />
-        <input type="button" class="btnpic" id="resultpic" value="图片" />
     </header>
-</body>
-<div id="container"></div>
-<div id="panel"></div>
 
-<script type="text/javascript">
-    var map = new AMap.Map("container", {
-        resizeEnable: true,
-        center: [116.397428, 39.90923],  //地图中心点
-        zoom: 13  //地图显示的缩放级别
-    });
-    var driving = new AMap.Driving({
+    <!-- 地图容器 -->
+    <div id="container"></div>
+
+    <!-- 浮动面板 -->
+    <div id="panel">
+        <iframe id="iframeContainer" src="passage.html" title="另一个页面"></iframe>
+    </div>
+
+    <!-- 控制面板显示的按钮 -->
+    <button id="togglePanelButton">展开面板</button>
+
+    <!-- 底部输入框和提交按钮 -->
+    <div id="footerInput">
+        <input type="text" id="footerText" placeholder="请输入一些文字" />
+        <button id="footerButton">提交</button>
+    </div>
+
+    <script type="text/javascript">
+        var map = new AMap.Map("container", {
+            resizeEnable: true,
+            center: [116.397428, 39.90923],  //地图中心点
+            zoom: 13  //地图显示的缩放级别
+        });
+
+        var driving = new AMap.Driving({
             map: map,
             panel: "panel"
-        }); 
-    document.getElementsByClassName("btnpic")[0].onclick = function(){
-        fetch("http://127.0.0.1:5001/api/post-data", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ key: "value" }),
-        })
-        .then(response => response.json())
-        .then(data => console.log(data))
-        .catch(error => console.error('Error:', error));
-    }
-    document.getElementsByClassName("btn")[0].onclick = function(){
-        var zhongdian = document.getElementById("zhongdian").value;
-        var qidian = document.getElementById("start").value;
-        var tujingdian1 = document.getElementById("tujingdian1").value;
-        var tujingdian2 = document.getElementById("tujingdian2").value;
-        var city=document.getElementById("city").value;
+        });
 
-        var route = [];
-        if(qidian) route.push(qidian);
-        if(tujingdian1) route.push(tujingdian1);
-        if(tujingdian2) route.push(tujingdian2);
-        if(zhongdian) route.push(zhongdian);
-        getRoute(route,city);
+        document.getElementsByClassName("btn")[0].onclick = function() {
+            var zhongdian = document.getElementById("zhongdian").value;
+            var qidian = document.getElementById("start").value;
+            var tujingdian1 = document.getElementById("tujingdian1").value;
+            var tujingdian2 = document.getElementById("tujingdian2").value;
+            var city = document.getElementById("city").value;
 
-        function getRoute(wayPoints,city){
-            // 构建完整的路线点数组，包括起点、途径点和终点
-            var routePoints = wayPoints.map(function(point) {
-                return {keyword: point, city:city};
-            });
-            for (var i=0;i<routePoints.length;i++){
-                log.success(routePoints[i]);
-            }
-            // 根据起终点名称规划驾车导航路线，并添加途径点
-            driving.search(routePoints, function(status, result) {
-                if (status === 'complete') {
-                    log.success('绘制驾车路线完成');
-                } else {
-                    log.error('获取驾车数据失败：' + result);
+            var route = [];
+            if (qidian) route.push(qidian);
+            if (tujingdian1) route.push(tujingdian1);
+            if (tujingdian2) route.push(tujingdian2);
+            if (zhongdian) route.push(zhongdian);
+            getRoute(route, city);
+
+            function getRoute(wayPoints, city) {
+                var routePoints = wayPoints.map(function(point) {
+                    return {keyword: point, city: city};
+                });
+                for (var i = 0; i < routePoints.length; i++) {
+                    log.success(routePoints[i]);
                 }
-            });
-        }
-    };
 
-</script>
+                driving.search(routePoints, function(status, result) {
+                    if (status === 'complete') {
+                        log.success('绘制驾车路线完成');
+                    } else {
+                        log.error('获取驾车数据失败：' + result);
+                    }
+                });
+            }
+        };
+
+        // 控制面板的显示和隐藏
+        document.getElementById("togglePanelButton").onclick = function() {
+            var panel = document.getElementById("panel");
+            panel.classList.toggle("expanded"); // 切换面板的展开/收起状态
+
+            var buttonText = panel.classList.contains("expanded") ? "收起面板" : "展开面板";
+            this.innerText = buttonText;  // 切换按钮的文本
+        };
+
+        // 提交按钮的功能
+        document.getElementById("footerButton").onclick = function() {
+            var inputText = document.getElementById("footerText").value;
+            var passage = document.getElementById("iframeContainer");
+             // 在 URL 中传递输入框的内容
+            var newSrc = "passage.html?input=" + encodeURIComponent(inputText);
+            passage.src = newSrc;
+            passage.contentWindow.location.reload();
+        };
+    </script>
 </body>
 </html>

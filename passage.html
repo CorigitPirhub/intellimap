@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>景区介绍</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+        }
+        .scenic-area {
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+        .scenic-area h2 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        .scenic-area img {
+            max-width: 300px; /* 限制图片的最大宽度 */
+            height: auto;
+            border-radius: 8px;
+        }
+        .scenic-area p {
+            font-size: 16px;
+        }
+        .scenic-area .image-container {
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="scenic-areas-container"></div>
+
+    <script>
+        // 获取 URL 中的查询参数
+        // const urlParams = new URLSearchParams(window.location.search);
+        // const inputText = urlParams.get('input'); // 获取名为 'input' 的参数
+        const scenicAreas = [
+            {
+                name: '西湖',
+                description: '西湖是中国杭州的一个著名景点，湖光山色，景色如画。',
+                imageUrl: 'https://img0.baidu.com/it/u=2792133114,2217717217&fm=253&fmt=auto&app=138&f=JPEG?w=800&h=1422'
+            },
+            {
+                name: '长城',
+                description: '长城是中国古代的伟大工程之一，是世界著名的文化遗产。',
+                imageUrl: 'https://img2.baidu.com/it/u=3881979309,4087182237&fm=253&fmt=auto&app=120&f=JPEG?w=889&h=500'
+            },
+            {
+                name: '故宫',
+                description: '故宫是中国明清两代的皇宫，是世界上最具规模的宫殿建筑。',
+                imageUrl: 'https://img0.baidu.com/it/u=3348083602,2488144541&fm=253&fmt=auto&app=138&f=JPEG?w=499&h=230'
+            }
+        ];
+
+        const container = document.getElementById('scenic-areas-container');
+
+        scenicAreas.forEach(area => {
+            const areaDiv = document.createElement('div');
+            areaDiv.classList.add('scenic-area');
+
+            const title = document.createElement('h2');
+            title.textContent = area.name;
+
+            const description = document.createElement('p');
+            description.textContent = area.description;
+
+            const imageContainer = document.createElement('div');
+            imageContainer.classList.add('image-container');
+            const img = document.createElement('img');
+            img.src = area.imageUrl;
+            img.alt = area.name;
+
+            imageContainer.appendChild(img);
+            areaDiv.appendChild(title);
+            areaDiv.appendChild(description);
+            areaDiv.appendChild(imageContainer);
+
+            container.appendChild(areaDiv);
+        });
+    </script>
+
+</body>
+</html>
+
+
+
