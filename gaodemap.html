@@ -1,0 +1,124 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
+    <style type="text/css">
+        #container {width: 100%;height: 100%;overflow: hidden;margin:0;font-family:"微软雅黑";}
+        header{margin: 5px auto;font-size: 16px;}
+            .typein{width: 90px;height: 16px;font-size: 16px;}
+            .btn{width: 60px;height: 30px;font-size: 16px;}
+        body, html {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+        }
+        .mapcontain {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+    <style type="text/css">
+        #panel {
+            position: fixed;
+            background-color: white;
+            max-height: 90%;
+            overflow-y: auto;
+            top: 10px;
+            right: 10px;
+            width: 280px;
+        }
+        #panel .amap-call {
+            background-color: #009cf9;
+            border-top-left-radius: 4px;
+   	        border-top-right-radius: 4px;
+        }
+        #panel .amap-lib-driving {
+	        border-bottom-left-radius: 4px;
+   	        border-bottom-right-radius: 4px;
+            overflow: hidden;
+        }
+    </style>
+    <script type="text/javascript">
+        window._AMapSecurityConfig = {
+          securityJsCode: "2a37818a30f4cd5df9d60493d7fc84a8",
+        };
+    </script>
+    <link rel="stylesheet" href="https://a.amap.com/jsapi_demos/static/demo-center/css/demo-center.css" />
+    <script src="https://a.amap.com/jsapi_demos/static/demo-center/js/demoutils.js"></script>
+    <script type="text/javascript" src="https://webapi.amap.com/maps?v=1.4.15&key=8077720f68f1002d4d1c8668f2714967&plugin=AMap.Driving"></script>
+    <script type="text/javascript" src="https://cache.amap.com/lbs/static/addToolbar.js"></script>
+</head>
+<body>
+    <header>
+        <label for="start">起点:<input type="text" placeholder="请输入起点" class="typein" id="start"/></label>
+        <label for="tujingdian1">途径点1:<input type="text" placeholder="请输入途径点1" class="typein" id="tujingdian1"/></label>
+        <label for="tujingdian2">途径点2:<input type="text" placeholder="请输入途径点1" class="typein" id="tujingdian2"/></label>
+        <label for="zhongdian">终点:<input type="text" id="zhongdian" placeholder="请输入终点" class="typein"/></label>
+        <label for="city">城市:<input type="text" id="city" placeholder="请输入城市" class="typein"/></label>
+        <input type="button" class="btn" id="result" value="查询" />
+        <input type="button" class="btnpic" id="resultpic" value="图片" />
+    </header>
+</body>
+<div id="container"></div>
+<div id="panel"></div>
+
+<script type="text/javascript">
+    var map = new AMap.Map("container", {
+        resizeEnable: true,
+        center: [116.397428, 39.90923],  //地图中心点
+        zoom: 13  //地图显示的缩放级别
+    });
+    var driving = new AMap.Driving({
+            map: map,
+            panel: "panel"
+        }); 
+    document.getElementsByClassName("btnpic")[0].onclick = function(){
+        fetch("http://127.0.0.1:5001/api/post-data", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ key: "value" }),
+        })
+        .then(response => response.json())
+        .then(data => console.log(data))
+        .catch(error => console.error('Error:', error));
+    }
+    document.getElementsByClassName("btn")[0].onclick = function(){
+        var zhongdian = document.getElementById("zhongdian").value;
+        var qidian = document.getElementById("start").value;
+        var tujingdian1 = document.getElementById("tujingdian1").value;
+        var tujingdian2 = document.getElementById("tujingdian2").value;
+        var city=document.getElementById("city").value;
+
+        var route = [];
+        if(qidian) route.push(qidian);
+        if(tujingdian1) route.push(tujingdian1);
+        if(tujingdian2) route.push(tujingdian2);
+        if(zhongdian) route.push(zhongdian);
+        getRoute(route,city);
+
+        function getRoute(wayPoints,city){
+            // 构建完整的路线点数组，包括起点、途径点和终点
+            var routePoints = wayPoints.map(function(point) {
+                return {keyword: point, city:city};
+            });
+            for (var i=0;i<routePoints.length;i++){
+                log.success(routePoints[i]);
+            }
+            // 根据起终点名称规划驾车导航路线，并添加途径点
+            driving.search(routePoints, function(status, result) {
+                if (status === 'complete') {
+                    log.success('绘制驾车路线完成');
+                } else {
+                    log.error('获取驾车数据失败：' + result);
+                }
+            });
+        }
+    };
+
+</script>
+</body>
+</html>

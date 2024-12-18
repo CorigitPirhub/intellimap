@@ -1,0 +1,8 @@
+PyQt6
+PyQt6-WebEngine
+urllib
+bs4
+selenium
+webdriver_manager
+flask
+flask_cors
