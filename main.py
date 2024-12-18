@@ -21,42 +21,43 @@ class MyWebEngineView(QWebEngineView):
         event.accept()  # 接受关闭事件
 
 
+if __name__ == '__main__':
 
-# 启动后台子进程
-server_process = Process(target=start_server, daemon=True)
-server_process.start()
+    # 启动后台子进程
+    server_process = Process(target=start_server, daemon=True)
+    server_process.start()
 
-app = QApplication(sys.argv)
+    app = QApplication(sys.argv)
 
-signal.signal(signal.SIGINT, signal.SIG_DFL)
+    signal.signal(signal.SIGINT, signal.SIG_DFL)
 
-current_script_path = os.path.dirname(os.path.abspath(__file__))
-relative_html_path = 'gaodemap.html'
-full_html_path = os.path.join(current_script_path, relative_html_path)
-qurl = QUrl.fromLocalFile(full_html_path)
+    current_script_path = os.path.dirname(os.path.abspath(__file__))
+    relative_html_path = 'gaodemap.html'
+    full_html_path = os.path.join(current_script_path, relative_html_path)
+    qurl = QUrl.fromLocalFile(full_html_path)
 
 
-profile = QWebEngineProfile.defaultProfile()
+    profile = QWebEngineProfile.defaultProfile()
 
-profile.setHttpCacheType(QWebEngineProfile.HttpCacheType.MemoryHttpCache)
-profile.setHttpCacheMaximumSize(100000000) # 100MB
-app.setAttribute(Qt.ApplicationAttribute.AA_UseOpenGLES,True)
-browser = MyWebEngineView()
-browser.settings().setAttribute(QWebEngineSettings.WebAttribute.LocalContentCanAccessRemoteUrls, True)
-browser.settings().setAttribute(QWebEngineSettings.WebAttribute.LocalContentCanAccessFileUrls, True)
-browser.settings().setAttribute(QWebEngineSettings.WebAttribute.JavascriptEnabled, True)
-browser.settings().setAttribute(QWebEngineSettings.WebAttribute.JavascriptCanOpenWindows, False)
-browser.settings().setAttribute(QWebEngineSettings.WebAttribute.AutoLoadImages, True)
-browser.settings().setAttribute(QWebEngineSettings.WebAttribute.LocalStorageEnabled, True)
+    profile.setHttpCacheType(QWebEngineProfile.HttpCacheType.MemoryHttpCache)
+    profile.setHttpCacheMaximumSize(100000000) # 100MB
+    app.setAttribute(Qt.ApplicationAttribute.AA_UseOpenGLES,True)
+    browser = MyWebEngineView()
+    browser.settings().setAttribute(QWebEngineSettings.WebAttribute.LocalContentCanAccessRemoteUrls, True)
+    browser.settings().setAttribute(QWebEngineSettings.WebAttribute.LocalContentCanAccessFileUrls, True)
+    browser.settings().setAttribute(QWebEngineSettings.WebAttribute.JavascriptEnabled, True)
+    browser.settings().setAttribute(QWebEngineSettings.WebAttribute.JavascriptCanOpenWindows, False)
+    browser.settings().setAttribute(QWebEngineSettings.WebAttribute.AutoLoadImages, True)
+    browser.settings().setAttribute(QWebEngineSettings.WebAttribute.LocalStorageEnabled, True)
 
-browser.setUrl(qurl)
-browser.show()
+    browser.setUrl(qurl)
+    browser.show()
 
-app.exec()
+    app.exec()
 
-# 确保子进程在应用退出后终止
-if server_process.is_alive():
-    server_process.terminate()
-    server_process.join()
+    # 确保子进程在应用退出后终止
+    if server_process.is_alive():
+        server_process.terminate()
+        server_process.join()
 
 

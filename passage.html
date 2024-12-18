@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,6 +11,7 @@
             line-height: 1.6;
             margin: 20px;
         }
+
         .scenic-area {
             border: 1px solid #ddd;
             padding: 20px;
@@ -17,78 +19,122 @@
             border-radius: 8px;
             background-color: #f9f9f9;
         }
+
         .scenic-area h2 {
             font-size: 24px;
             margin-bottom: 10px;
         }
+
         .scenic-area img {
-            max-width: 300px; /* 限制图片的最大宽度 */
+            max-width: 300px;
+            /* 限制图片的最大宽度 */
             height: auto;
             border-radius: 8px;
         }
+
         .scenic-area p {
             font-size: 16px;
         }
+
         .scenic-area .image-container {
             margin-top: 15px;
         }
     </style>
 </head>
+
 <body>
 
+    <h1>景区列表</h1>
     <div id="scenic-areas-container"></div>
 
     <script>
-        // 获取 URL 中的查询参数
-        // const urlParams = new URLSearchParams(window.location.search);
-        // const inputText = urlParams.get('input'); // 获取名为 'input' 的参数
-        const scenicAreas = [
-            {
-                name: '西湖',
-                description: '西湖是中国杭州的一个著名景点，湖光山色，景色如画。',
-                imageUrl: 'https://img0.baidu.com/it/u=2792133114,2217717217&fm=253&fmt=auto&app=138&f=JPEG?w=800&h=1422'
-            },
-            {
-                name: '长城',
-                description: '长城是中国古代的伟大工程之一，是世界著名的文化遗产。',
-                imageUrl: 'https://img2.baidu.com/it/u=3881979309,4087182237&fm=253&fmt=auto&app=120&f=JPEG?w=889&h=500'
-            },
-            {
-                name: '故宫',
-                description: '故宫是中国明清两代的皇宫，是世界上最具规模的宫殿建筑。',
-                imageUrl: 'https://img0.baidu.com/it/u=3348083602,2488144541&fm=253&fmt=auto&app=138&f=JPEG?w=499&h=230'
+        var scenicAreas = [];
+
+        // 动态渲染景点到页面的函数
+        function renderScenicAreas() {
+            var container = document.getElementById("scenic-areas-container");
+
+            // 清空容器内容
+            container.innerHTML = "";
+
+            scenicAreas.forEach(area => {
+                // 创建景点展示的HTML结构
+                var scenicDiv = document.createElement("div");
+                scenicDiv.className = "scenic-area";
+
+                // 创建并添加标题
+                const title = document.createElement("h2");
+                title.textContent = area.name;
+
+                // 创建并添加描述
+                const description = document.createElement("p");
+                description.textContent = area.description;
+
+                // 创建并添加图片
+                const image = document.createElement("img");
+                image.src = area.imageURL;  // 假设你有一个 imageURL 属性
+                image.alt = `${area.name}`;  // 图片的描述文本
+                image.className = "scenic-image"; // 可选，给图片添加类名，方便样式控制
+                image.style.maxWidth = "300px";  // 控制图片最大宽度
+                image.style.height = "auto";     // 保持图片比例
+
+                // 将标题、描述和图片添加到景点的 div 中
+                scenicDiv.appendChild(title);
+                scenicDiv.appendChild(description);
+                scenicDiv.appendChild(image);
+
+                // 将景点的 div 添加到容器中
+                container.appendChild(scenicDiv);
+            });
+        }
+
+
+        // 监听消息事件,用来接收主界面发送过来的数据
+        window.addEventListener("message", function (event) {
+            var data = event.data;
+
+            if (Array.isArray(data)) {
+                fetch('http://127.0.0.1:5001/api/post-data', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data) // 将 data 转换为 JSON 字符串
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();;
+                })
+                .then(res => {
+                    if (Array.isArray(res)) {
+                        res.forEach(item => {
+                            scenicAreas.push({
+                                name: item['景点'],
+                                description: item["介绍"],
+                                imageURL: item["图片"]
+                            });
+                        })
+                        // 渲染景点数据到页面
+                        renderScenicAreas();
+                    }
+                    else {
+                        console.error("接收到的数据不是有效的 JSON 数组：", res);
+                    }    
+                })
+                .catch(error => {
+                    console.error('There was a problem with the fetch operation:', error);
+                });
+
+
+            } else {
+                console.error("接收到的数据不是有效的 JSON 数组：", data);
             }
-        ];
 
-        const container = document.getElementById('scenic-areas-container');
-
-        scenicAreas.forEach(area => {
-            const areaDiv = document.createElement('div');
-            areaDiv.classList.add('scenic-area');
-
-            const title = document.createElement('h2');
-            title.textContent = area.name;
-
-            const description = document.createElement('p');
-            description.textContent = area.description;
-
-            const imageContainer = document.createElement('div');
-            imageContainer.classList.add('image-container');
-            const img = document.createElement('img');
-            img.src = area.imageUrl;
-            img.alt = area.name;
-
-            imageContainer.appendChild(img);
-            areaDiv.appendChild(title);
-            areaDiv.appendChild(description);
-            areaDiv.appendChild(imageContainer);
-
-            container.appendChild(areaDiv);
         });
     </script>
 
 </body>
+
 </html>
-
-
-
