@@ -6,10 +6,25 @@ from PyQt6.QtWebEngineCore import QWebEngineSettings, QWebEngineProfile
 from PyQt6.QtCore import QUrl, Qt
 from PyQt6.QtWidgets import QApplication
 from backend import start_server
-import threading
+from multiprocessing import Process
 
-server_thread = threading.Thread(target=start_server)
-server_thread.start()
+
+
+
+class MyWebEngineView(QWebEngineView):
+    def closeEvent(self, event):
+        print("Closing the application...")
+        if server_process.is_alive():  # 检查子进程是否运行中
+            server_process.terminate()  # 终止子进程
+            server_process.join()  # 等待子进程结束
+            print("Server process terminated.")
+        event.accept()  # 接受关闭事件
+
+
+
+# 启动后台子进程
+server_process = Process(target=start_server, daemon=True)
+server_process.start()
 
 app = QApplication(sys.argv)
 
@@ -24,9 +39,9 @@ qurl = QUrl.fromLocalFile(full_html_path)
 profile = QWebEngineProfile.defaultProfile()
 
 profile.setHttpCacheType(QWebEngineProfile.HttpCacheType.MemoryHttpCache)
-profile.setHttpCacheMaximumSize(100000000) # 10MB
+profile.setHttpCacheMaximumSize(100000000) # 100MB
 app.setAttribute(Qt.ApplicationAttribute.AA_UseOpenGLES,True)
-browser = QWebEngineView()
+browser = MyWebEngineView()
 browser.settings().setAttribute(QWebEngineSettings.WebAttribute.LocalContentCanAccessRemoteUrls, True)
 browser.settings().setAttribute(QWebEngineSettings.WebAttribute.LocalContentCanAccessFileUrls, True)
 browser.settings().setAttribute(QWebEngineSettings.WebAttribute.JavascriptEnabled, True)
@@ -38,3 +53,10 @@ browser.setUrl(qurl)
 browser.show()
 
 app.exec()
+
+# 确保子进程在应用退出后终止
+if server_process.is_alive():
+    server_process.terminate()
+    server_process.join()
+
+
