@@ -25,6 +25,7 @@ class BaiduImageScraper:
         options = webdriver.ChromeOptions()
         options.add_argument("--headless")  # 无头模式运行
         options.add_argument("--disable-gpu")
+        options.page_load_strategy = "eager"
         driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
         driver.get(self.base_url)
