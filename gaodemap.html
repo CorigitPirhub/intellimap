@@ -246,7 +246,7 @@
                     return response.json();  // 解析为 JSON
                 })
                 .then(data => {
-                    passage.contentWindow.postMessage(data, "*");
+                    passage.contentWindow.postMessage(data['计划'], "*");
                     // TODO 此处要正确解析JSON，并传递给iframe
                     if(Array.isArray(data['计划'])){
                         var route = [];
