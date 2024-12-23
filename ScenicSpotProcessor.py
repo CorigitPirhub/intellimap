@@ -96,23 +96,23 @@ class ScenicSpotProcessor:
             return response.choices[0].message.content.strip()
 
         # 如果未能成功获取内容，返回默认提示
-        return "无法获取景点介绍，请稍后重试。"
+        return "无法获取景点介绍，请稍后重试"
 
     def process_spot(self, city, spot):
         """处理单个景点的主流程"""
         print(f"\n开始处理景点: {city} {spot}")
 
         # 搜索关键词
-        search_term = f"{city} {spot}"
+        # search_term = f"{city} {spot}"
 
         # 获取图片链接
-        image_links = self._get_image_links(search_term)
-        if not image_links:
-            print(f"{search_term}: 未获取到任何图片链接")
-            return None
+        # image_links = self._get_image_links(search_term)
+        # if not image_links:
+        #     print(f"{search_term}: 未获取到任何图片链接")
+        #     return None
 
         # 下载第一张图片
-        image_path = self._download_image(image_links[0], city, spot)
+        image_path = "self._download_image(image_links[0], city, spot)"
 
         # 获取景点介绍
         description = self.get_scenic_description(city, spot)
