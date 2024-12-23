@@ -15,38 +15,38 @@
         }
 
         #header {
-        display: flex;
-        justify-content: space-around;
-        align-items: center;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 30%;
-        height: 80px;
-        background-color: transparent;
-        padding: 0px 60px;
-        box-sizing: border-box;
-        z-index: 1000;
-    }
-    .typein {
-        padding: 8px;
-        margin: 0 5px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        width: 200px; /* 设置固定宽度 */
-        height: 100px;
-    }
-    .btn {
-        padding: 8px 15px;
-        border: none;
-        border-radius: 4px;
-        background-color: #007bff;
-        color: white;
-        cursor: pointer;
-    }
-    .btn:hover {
-        background-color: #0056b3;
-    }
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 30%;
+            height: 80px;
+            background-color: transparent;
+            padding: 0px 60px;
+            box-sizing: border-box;
+            z-index: 1000;
+        }
+        .typein {
+            padding: 8px;
+            margin: 0 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 200px; /* 设置固定宽度 */
+            height: 100px;
+        }
+        .btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
 
         body,
         html {
@@ -242,7 +242,7 @@
     </div>
 
 
-        <!-- 右下角的按钮和标签 -->
+    <!-- 右下角的按钮和标签 -->
     <div id="dateControls">
         <button id="prevDayButton">上一天</button>
         <span id="dayLabel">第0天</span>
@@ -270,8 +270,6 @@
             var tujingdian1 = document.getElementById("tujingdian1").value;
             var tujingdian2 = document.getElementById("tujingdian2").value;
             var city = document.getElementById("city").value;
-
-
         };
 
         // 控制面板的显示和隐藏
@@ -288,7 +286,7 @@
             var inputText = document.getElementById("footerText").value;
             var passage = document.getElementById("iframeContainer");
             passage.src = "passage.html";
-            //passage.contentWindow.location.reload();
+            // passage.contentWindow.location.reload();
             fetch('http://127.0.0.1:5001/api/get-data?input=' + inputText, {
                 method: 'GET',
                 headers: {
@@ -303,7 +301,7 @@
                 })
                 .then(data => {
                     passage.contentWindow.postMessage(data, "*");
-                    // TODO 此处要正确解析JSON，并传递给iframe
+                    
                     city = data['城市'];
                     if(Array.isArray(data['计划'])){
                         route = decodeJSON(data['计划']);
@@ -321,7 +319,7 @@
         };
 
 
-            // 上一天按钮点击事件
+        // 上一天按钮点击事件
         document.getElementById('prevDayButton').addEventListener('click', function() {
             if (currentDate > 1) {
                 currentDate--;
@@ -343,7 +341,7 @@
         });
 
 
-                // 更新日期标签的函数
+        // 更新日期标签的函数
         function updateDayLabel() {
             document.getElementById('dayLabel').textContent = `第${currentDate}天`;
         }

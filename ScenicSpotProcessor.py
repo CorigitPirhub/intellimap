@@ -1,15 +1,4 @@
-import os
-import time
-import requests
-from bs4 import BeautifulSoup
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
-from concurrent.futures import ThreadPoolExecutor
-from urllib.parse import quote
-import json
 from zhipuai import ZhipuAI
-
 
 class ScenicSpotProcessor:
     def __init__(self, api_key):
@@ -17,8 +6,6 @@ class ScenicSpotProcessor:
 
         # 初始化 ZhipuAI 模型
         self.model = ZhipuAI(api_key=api_key)
-
-    
 
     def get_scenic_description(self, city, spot):
         """调用大语言模型生成景点介绍"""

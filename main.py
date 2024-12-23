@@ -8,9 +8,6 @@ from PyQt6.QtWidgets import QApplication
 from backend import start_server
 from multiprocessing import Process
 
-
-
-
 class MyWebEngineView(QWebEngineView):
     def closeEvent(self, event):
         print("Closing the application...")
@@ -59,5 +56,3 @@ if __name__ == '__main__':
     if server_process.is_alive():
         server_process.terminate()
         server_process.join()
-
-
