@@ -6,3 +6,5 @@ webdriver_manager
 flask
 flask_cors
 zhipuai
+langchain_openai
+langchain

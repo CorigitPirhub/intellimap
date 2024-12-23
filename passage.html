@@ -93,7 +93,7 @@
         window.addEventListener("message", function (event) {
             var data = event.data;
 
-            if (Array.isArray(data)) {
+            if (data) {
                 fetch('http://127.0.0.1:5001/api/post-data', {
                     method: 'POST',
                     headers: {

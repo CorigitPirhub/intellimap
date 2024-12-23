@@ -14,22 +14,39 @@
             font-family: "微软雅黑";
         }
 
-        header {
-            margin: 5px auto;
-            font-size: 16px;
-        }
-
-        .typein {
-            width: 90px;
-            height: 16px;
-            font-size: 16px;
-        }
-
-        .btn {
-            width: 60px;
-            height: 30px;
-            font-size: 16px;
-        }
+        #header {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 30%;
+        height: 80px;
+        background-color: transparent;
+        padding: 0px 60px;
+        box-sizing: border-box;
+        z-index: 1000;
+    }
+    .typein {
+        padding: 8px;
+        margin: 0 5px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        width: 200px; /* 设置固定宽度 */
+        height: 100px;
+    }
+    .btn {
+        padding: 8px 15px;
+        border: none;
+        border-radius: 4px;
+        background-color: #007bff;
+        color: white;
+        cursor: pointer;
+    }
+    .btn:hover {
+        background-color: #0056b3;
+    }
 
         body,
         html {
@@ -152,6 +169,39 @@
             border-radius: 5px;
             cursor: pointer;
         }
+        #dateControls {
+            position: fixed;
+            right: 10px;
+            bottom: 10px;
+        }
+
+        #dateControls button,
+        #dateControls span {
+            height: 36px;
+            padding: 0 20px;
+            font-size: 16px;
+            background-color: #009cf9;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px; /* 添加一些外边距 */
+        }
+
+        #dateControls span {
+            display: inline-block; /* 确保标签是行内块元素 */
+            height: 36px; /* 增加标签的高度 */
+            line-height: 36px; /* 设置行高以垂直居中文本 */
+            font-size: 20px; /* 增加字体大小 */
+            background-color: rgb(231, 231, 231);
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 0 15px; /* 增加内边距 */
+            margin: 5px; /* 添加一些外边距 */
+            color: black;
+        }
+
+
     </style>
 
     <script type="text/javascript">
@@ -168,16 +218,11 @@
 </head>
 
 <body>
-    <header>
-        <label for="start">起点:<input type="text" placeholder="请输入起点" class="typein" id="start" /></label>
-        <label for="tujingdian1">途径点1:<input type="text" placeholder="请输入途径点1" class="typein"
-                id="tujingdian1" /></label>
-        <label for="tujingdian2">途径点2:<input type="text" placeholder="请输入途径点1" class="typein"
-                id="tujingdian2" /></label>
-        <label for="zhongdian">终点:<input type="text" id="zhongdian" placeholder="请输入终点" class="typein" /></label>
-        <label for="city">城市:<input type="text" id="city" placeholder="请输入城市" class="typein" /></label>
+    <div id="header">
+        <input type="text" placeholder="请输入起点" class="typein" id="start" />
+        <input type="text" id="zhongdian" placeholder="请输入终点" class="typein" />
         <input type="button" class="btn" id="result" value="查询" />
-    </header>
+    </div>
 
     <!-- 地图容器 -->
     <div id="container"></div>
@@ -196,7 +241,18 @@
         <button id="footerButton">提交</button>
     </div>
 
+
+        <!-- 右下角的按钮和标签 -->
+    <div id="dateControls">
+        <button id="prevDayButton">上一天</button>
+        <span id="dayLabel">第0天</span>
+        <button id="nextDayButton">下一天</button>
+    </div>
     <script type="text/javascript">
+        var day_times = 0;
+        var currentDate = 0;
+        var city = '';
+        var route = null;
         var map = new AMap.Map("container", {
             resizeEnable: true,
             center: [116.397428, 39.90923],  //地图中心点
@@ -246,16 +302,14 @@
                     return response.json();  // 解析为 JSON
                 })
                 .then(data => {
-                    passage.contentWindow.postMessage(data['计划'], "*");
+                    passage.contentWindow.postMessage(data, "*");
                     // TODO 此处要正确解析JSON，并传递给iframe
+                    city = data['城市'];
                     if(Array.isArray(data['计划'])){
-                        var route = [];
-                        data['计划'].forEach(item =>{
-                            if(item["景点"]){
-                                route.push(item["景点"])
-                            }
-                        })
-                        getRoute(route, city);
+                        route = decodeJSON(data['计划']);
+                        getRoute(route.get(1), city);
+                        currentDate = 1;
+                        updateDayLabel();
                     }
                     else{
                         alert("大模型未返回正确的JSON格式")
@@ -266,6 +320,54 @@
                 });
         };
 
+
+            // 上一天按钮点击事件
+        document.getElementById('prevDayButton').addEventListener('click', function() {
+            if (currentDate > 1) {
+                currentDate--;
+                updateDayLabel();
+                if(route != null)
+                    getRoute(route.get(currentDate), city);
+            }
+        });
+
+        // 下一天按钮点击事件
+        document.getElementById('nextDayButton').addEventListener('click', function() {
+            if(currentDate < day_times){
+                currentDate++;
+                updateDayLabel();
+                if(route != null)
+                    getRoute(route.get(currentDate), city);
+            }
+            
+        });
+
+
+                // 更新日期标签的函数
+        function updateDayLabel() {
+            document.getElementById('dayLabel').textContent = `第${currentDate}天`;
+        }
+
+        function decodeJSON(jsonString) {
+            var route = new Map();
+            day_times = 0;
+            jsonString.forEach(item =>{
+                day_times++;
+                for (var day in item) {
+                    // 获取该天的活动列表
+                    var activities = item[day];
+                    // 遍历活动列表
+                    var a_plan = [];
+                    activities.forEach(function(activity) {
+                        console.log(activity['景点']);
+                        a_plan.push(activity['景点']);
+                    });
+                    var map = new Map();
+                    route.set(day_times,a_plan);
+                }
+            })
+            return route;
+        }
 
 
         function getRoute(wayPoints, city) {

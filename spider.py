@@ -14,13 +14,13 @@ def get_image_urls(query, num_images):
         return []
 
 
-def download_images(image_urls, save_dir,j):
+def download_images(image_urls, save_dir,img_name):
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
 
     for i, url in enumerate(image_urls):
         response = requests.get(url)
-        with open(f"{save_dir}/image_{j}_{i}.jpg", "wb") as f:
+        with open(f"{save_dir}/image_{img_name}.jpg", "wb") as f:
             f.write(response.content)
 
 if __name__ == "__main__":

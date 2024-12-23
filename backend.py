@@ -1,5 +1,8 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from TourLLMChain import TourLLMChain
+from spider import get_image_urls, download_images
+from ScenicSpotProcessor import ScenicSpotProcessor
 
 app = Flask(__name__)
 CORS(app) 
@@ -8,36 +11,48 @@ CORS(app)
 def get_data():
     #获取input
     input = request.args.get('input')
-    print("input:", input)
+    model_key = "cc862aedd49bca887df25916a75c329c.OiEqowH9EgzL1N1X"
+    itinerary_chain = TourLLMChain(input, model_key)
+    json_itinerary = itinerary_chain.generate_json_itinerary()
+    city = itinerary_chain.extract_city()
     # 构造返回的JSON数据,此处需要根据用户输入input询问大模型，让大模型生成JSON数组，格式如下
-    json_data = [
-        {"景点": "黄河游览区", "时长": "4.0小时"},
-        {"景点": "郑州黄河风景名胜区", "时长": "3.0小时"},
-        {"景点": "河南博物院", "时长": "3.0小时"},
-        {"景点": "郑州动物园", "时长": "3.0小时"},
-        {"景点": "少林寺", "时长": "6.0小时"},
-    ]
     res_json = {
-        "城市": "郑州",
-        "计划": json_data
+        "城市": city,
+        "计划": json_itinerary
     }
     return jsonify(res_json)
 
 @app.route('/api/post-data', methods=['POST'])
 def post_data():
+    json_data = []
     # 处理POST请求
-    data = request.json # data一定是个JSON数组
-    
-    # 在此处处理POST请求的数据，进行爬虫并且生成对应景点的介绍
+    data = request.get_json() # data一定是个JSON数组
+    city = data['城市']
+    data = data['计划']
 
-    # 最后生成一个JSON数组返回，格式如下
-    json_data = [
-        {"景点": "黄河游览区","图片": "test.jpg", "介绍": "黄河游览区位于郑州市，是一个集旅游、文化、娱乐为一体的综合性景区。景区内有黄河大桥、黄河风景区、黄河博物馆等景点，是郑州市的一大旅游景点。"},
-        {"景点": "郑州黄河风景名胜区", "图片": "test.jpg","介绍": "郑州黄河风景名胜区位于郑州市，是一个以黄河为主题的风景名胜区。景区内有黄河大桥、黄河风景区、黄河博物馆等景点，是郑州市的一大旅游景点。"},
-        {"景点": "河南博物院", "图片": "test.jpg", "介绍": "河南博物院位于郑州市，是一个集文物收藏、陈列展览、学术研究为一体的综合性博物馆。博物馆内有众多珍贵文物，是郑州市的一大旅游景点。"},
-        {"景点": "郑州动物园", "图片": "test.jpg", "介绍": "郑州动物园位于郑州市，是一个集动物观赏、科普教育、休闲娱乐为一体的综合性动物园。动物园内有众多珍稀动物，是郑州市的一大旅游景点。"},
-        {"景点": "少林寺", "图片": "test.jpg", "介绍": "少林寺位于郑州市，是一个具有悠久历史和深厚文化底蕴的佛教寺庙。寺庙内有众多古迹和文物，是郑州市的一大旅游景点。"},
-    ]
+    for day in data:
+        # 由于每个元素都是一个字典，并且只有一个键，我们可以这样获取键和值
+        day_key, day_value = next(iter(day.items()))
+        for attraction in day_value:
+            query = attraction['景点']
+            num_images = 1  # 设置为1，只获取一张照片
+            save_dir = "images"
+
+            image_urls = get_image_urls(query, num_images)
+            if image_urls:
+                download_images(image_urls, save_dir, query)  # 传入 j=0，因为只有一张照片
+                print("成功下载第一张图片！",query)
+                processor = ScenicSpotProcessor(api_key="cc862aedd49bca887df25916a75c329c.OiEqowH9EgzL1N1X")
+                description = processor.get_scenic_description(city, query)
+                this_data = {
+                    "景点": query,
+                    "图片": f"{save_dir}/image_{query}.jpg",
+                    "介绍": description
+                }
+                json_data.append(this_data)
+            else:
+                print("未找到任何图片。",query)
+            
     return jsonify(json_data)
 
 
