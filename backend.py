@@ -3,7 +3,8 @@ from flask_cors import CORS
 from TourLLMChain import TourLLMChain
 from spider import get_image_urls, download_images
 from ScenicSpotProcessor import ScenicSpotProcessor
-
+import os
+import shutil
 app = Flask(__name__)
 CORS(app) 
 
@@ -29,15 +30,17 @@ def post_data():
     data = request.get_json() # data一定是个JSON数组
     city = data['城市']
     data = data['计划']
-
+    num_images = 1  # 设置为1，只获取一张照片
+    save_dir = "images"
+    delete_images(save_dir)
     for day in data:
         # 由于每个元素都是一个字典，并且只有一个键，我们可以这样获取键和值
         day_key, day_value = next(iter(day.items()))
+
         for attraction in day_value:
             query = attraction['景点']
-            num_images = 1  # 设置为1，只获取一张照片
-            save_dir = "images"
-
+            # 删除images下的所有文件
+           
             image_urls = get_image_urls(query, num_images)
             if image_urls:
                 download_images(image_urls, save_dir, query)  # 传入 j=0，因为只有一张照片
@@ -55,7 +58,16 @@ def post_data():
             
     return jsonify(json_data)
 
-
+def delete_images(save_dir):
+     for filename in os.listdir(save_dir):
+        file_path = os.path.join(save_dir, filename)
+        try:
+            if os.path.isfile(file_path) or os.path.islink(file_path):
+                os.unlink(file_path)
+            elif os.path.isdir(file_path):
+                shutil.rmtree(file_path)
+        except Exception as e:
+            print('Failed to delete %s. Reason: %s' % (file_path, e))
 
 def start_server():
     global app
