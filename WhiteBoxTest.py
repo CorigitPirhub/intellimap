@@ -1,10 +1,25 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 import time
+from TestLLMChain import TestLLMChain
+
 
 # 替换为你的本地 HTML 文件路径（确保路径正确）
-file_path = "file:///C:/classes/software_test/软件质量/intellimap/gaodemap.html"
+file_path = "gaodemap.html"
 
+model_key = "cc862aedd49bca887df25916a75c329c.OiEqowH9EgzL1N1X"
+
+# 初始化 TestLLMChain
+test_chain = TestLLMChain(model_key)
+
+# 执行测试
+# test_chain.test_tour_chain()
+invalid_seeds, invalid_variants = test_chain.generate_seeds_and_variants(
+        test_chain.invalid_seed_chain, test_chain.invalid_variant_chain, "无效测试用例"
+    )
+print(invalid_seeds)
+print(invalid_variants)
+combined = invalid_seeds+invalid_variants
 # 初始化 WebDriver
 driver = webdriver.Chrome()
 
@@ -21,7 +36,7 @@ try:
     submit_button = driver.find_element(By.ID, "footerButton")
 
     # 输入数组内容
-    input_values = ["测试输入1", "测试输入2", "测试输入3", "测试输入4"]
+    input_values = invalid_variants
 
     for value in input_values:
         # 清空输入框

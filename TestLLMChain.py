@@ -167,6 +167,29 @@ class TestLLMChain:
         # 跳过第一行和最后一行，保留中间的有效内容
         filtered_lines = [line for line in lines[1:-1] if re.search(r'[\u4e00-\u9fa5]', line)]
         return filtered_lines
+    
+    def generate_seeds_and_variants(self, seed_chain, variant_chain, description):
+        """生成测试用例及变异，返回两个一维数组：seeds 和 variants"""
+        print(f"开始生成 {description} 种子...")
+
+        # 生成种子并筛选有效内容
+        seed_response = seed_chain.invoke({"seed": "开始生成测试用例"})['text'].strip()
+        seeds = self._filter_chinese_lines(seed_response)[:self.max_seeds]  # 限制数量
+        print(f"{description} 种子生成完成，共生成 {len(seeds)} 个（最多取前 {self.max_seeds} 个）。")
+
+        # 对每个种子生成变异
+        variants = []
+        for seed in seeds:
+            print(f"生成种子: {seed} 的变异...")
+            variant_response = variant_chain.invoke({"seed": seed})['text'].strip()
+            variant_list = self._filter_chinese_lines(variant_response)[:self.max_variants_per_seed]  # 限制数量
+            if not variant_list:
+                print(f"种子 {seed} 没有生成任何有效的变异测试用例！")
+            else:
+                variants.extend(variant_list)  # 将当前种子的变异添加到扁平化的列表中
+            print(f"种子 {seed} 变异完成，生成了 {len(variant_list)} 个变异。")
+
+        return seeds, variants
 
 
     def generate_test_cases(self, seed_chain, variant_chain, description):
@@ -297,7 +320,7 @@ if __name__ == "__main__":
 
     # 执行测试
     # test_chain.test_tour_chain()
-    invalid_seeds, invalid_variants = test_chain.generate_test_cases(
+    invalid_seeds, invalid_variants = test_chain.generate_seeds_and_variants(
             test_chain.invalid_seed_chain, test_chain.invalid_variant_chain, "无效测试用例"
         )
     print(invalid_seeds)
