@@ -43,98 +43,98 @@
 </head>
 
 <body>
+    <h1>旅游计划</h1>
+    <div id="plan-container"></div>
 
     <h1>景区列表</h1>
     <div id="scenic-areas-container"></div>
 
-    <script>
-        var scenicAreas = [];
-
-        // 动态渲染景点到页面的函数
-        function renderScenicAreas() {
-            var container = document.getElementById("scenic-areas-container");
-
-            // 清空容器内容
-            container.innerHTML = "";
-
-            scenicAreas.forEach(area => {
-                // 创建景点展示的HTML结构
-                var scenicDiv = document.createElement("div");
-                scenicDiv.className = "scenic-area";
-
-                // 创建并添加标题
-                const title = document.createElement("h2");
-                title.textContent = area.name;
-
-                // 创建并添加描述
-                const description = document.createElement("p");
-                description.textContent = area.description;
-
-                // 创建并添加图片
-                const image = document.createElement("img");
-                image.src = area.imageURL;  // 假设你有一个 imageURL 属性
-                image.alt = `${area.name}`;  // 图片的描述文本
-                image.className = "scenic-image"; // 可选，给图片添加类名，方便样式控制
-                image.style.maxWidth = "300px";  // 控制图片最大宽度
-                image.style.height = "auto";     // 保持图片比例
-
-                // 将标题、描述和图片添加到景点的 div 中
-                scenicDiv.appendChild(title);
-                scenicDiv.appendChild(description);
-                scenicDiv.appendChild(image);
-
-                // 将景点的 div 添加到容器中
-                container.appendChild(scenicDiv);
-            });
-        }
-
-
-        // 监听消息事件,用来接收主界面发送过来的数据
-        window.addEventListener("message", function (event) {
-            var data = event.data;
-
-            if (data) {
-                fetch('http://127.0.0.1:5001/api/post-data', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(data) // 将 data 转换为 JSON 字符串
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();;
-                })
-                .then(res => {
-                    if (Array.isArray(res)) {
-                        res.forEach(item => {
-                            scenicAreas.push({
-                                name: item['景点'],
-                                description: item["介绍"],
-                                imageURL: item["图片"]
-                            });
-                        })
-                        // 渲染景点数据到页面
-                        renderScenicAreas();
-                    }
-                    else {
-                        console.error("接收到的数据不是有效的 JSON 数组：", res);
-                    }    
-                })
-                .catch(error => {
-                    console.error('There was a problem with the fetch operation:', error);
-                });
-
-
-            } else {
-                console.error("接收到的数据不是有效的 JSON 数组：", data);
-            }
-
-        });
-    </script>
+   
 
 </body>
+<script>
+    var scenicAreas = [];
 
+    // 动态渲染景点到页面的函数
+    function renderScenicAreas() {
+        var container = document.getElementById("scenic-areas-container");
+
+        // 清空容器内容
+        container.innerHTML = "";
+
+        scenicAreas.forEach(area => {
+            // 创建景点展示的HTML结构
+            var scenicDiv = document.createElement("div");
+            scenicDiv.className = "scenic-area";
+
+            // 创建并添加标题
+            const title = document.createElement("h2");
+            title.textContent = area.name;
+
+            // 创建并添加描述
+            const description = document.createElement("p");
+            description.textContent = area.description;
+
+            // 创建并添加图片
+            const image = document.createElement("img");
+            image.src = area.imageURL;  // 假设你有一个 imageURL 属性
+            image.alt = `${area.name}`;  // 图片的描述文本
+            image.className = "scenic-image"; // 可选，给图片添加类名，方便样式控制
+            image.style.maxWidth = "300px";  // 控制图片最大宽度
+            image.style.height = "auto";     // 保持图片比例
+
+            // 将标题、描述和图片添加到景点的 div 中
+            scenicDiv.appendChild(title);
+            scenicDiv.appendChild(description);
+            scenicDiv.appendChild(image);
+
+            // 将景点的 div 添加到容器中
+            container.appendChild(scenicDiv);
+        });
+    }
+
+
+    // 监听消息事件,用来接收主界面发送过来的数据
+    window.addEventListener("message", function (event) {
+        var data = event.data;
+        if (data) {
+            
+            fetch('http://127.0.0.1:5001/api/post-data', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data) // 将 data 转换为 JSON 字符串
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();;
+            })
+            .then(res => {
+                if (Array.isArray(res)) {
+                    res.forEach(item => {
+                        scenicAreas.push({
+                            name: item['景点'],
+                            description: item["介绍"],
+                            imageURL: item["图片"]
+                        });
+                    })
+                    // 渲染景点数据到页面
+                    renderScenicAreas();
+                }
+                else {
+                    console.error("接收到的数据不是有效的 JSON 数组：", res);
+                }    
+            })
+            .catch(error => {
+                console.error('There was a problem with the fetch operation:', error);
+            });
+        } else {
+            console.error("接收到的数据不是有效的 JSON 数组：", data);
+        }
+
+    });
+</script>
 </html>
