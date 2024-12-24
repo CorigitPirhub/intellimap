@@ -81,14 +81,14 @@
         }
 
         /* 面板头部样式 */
-        #panel .amap-call {
+        #mapPanel .amap-call {
             background-color: #009cf9;
             border-top-left-radius: 4px;
             border-top-right-radius: 4px;
         }
 
         /* 面板内容区域样式 */
-        #panel .amap-lib-driving {
+        #mapPanel .amap-lib-driving {
             border-bottom-left-radius: 4px;
             border-bottom-right-radius: 4px;
             overflow: hidden;
@@ -248,144 +248,143 @@
         <span id="dayLabel">第0天</span>
         <button id="nextDayButton">下一天</button>
     </div>
-    <script type="text/javascript">
-        var day_times = 0;
-        var currentDate = 0;
-        var city = '';
-        var route = null;
-        var map = new AMap.Map("container", {
-            resizeEnable: true,
-            center: [116.397428, 39.90923],  //地图中心点
-            zoom: 13  //地图显示的缩放级别
-        });
-
-        var driving = new AMap.Driving({
-            map: map,
-            panel: "panel"
-        });
-
-        document.getElementsByClassName("btn")[0].onclick = function () {
-            var zhongdian = document.getElementById("zhongdian").value;
-            var qidian = document.getElementById("start").value;
-            var tujingdian1 = document.getElementById("tujingdian1").value;
-            var tujingdian2 = document.getElementById("tujingdian2").value;
-            var city = document.getElementById("city").value;
-        };
-
-        // 控制面板的显示和隐藏
-        document.getElementById("togglePanelButton").onclick = function () {
-            var panel = document.getElementById("panel");
-            panel.classList.toggle("expanded"); // 切换面板的展开/收起状态
-
-            var buttonText = panel.classList.contains("expanded") ? "收起面板" : "展开面板";
-            this.innerText = buttonText;  // 切换按钮的文本
-        };
-
-        // 提交按钮的功能
-        document.getElementById("footerButton").onclick = function () {
-            var inputText = document.getElementById("footerText").value;
-            var passage = document.getElementById("iframeContainer");
-            passage.src = "passage.html";
-            // passage.contentWindow.location.reload();
-            fetch('http://127.0.0.1:5001/api/get-data?input=' + inputText, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();  // 解析为 JSON
-                })
-                .then(data => {
-                    passage.contentWindow.postMessage(data, "*");
-                    
-                    city = data['城市'];
-                    if(Array.isArray(data['计划'])){
-                        route = decodeJSON(data['计划']);
-                        getRoute(route.get(1), city);
-                        currentDate = 1;
-                        updateDayLabel();
-                    }
-                    else{
-                        alert("大模型未返回正确的JSON格式")
-                    }
-                })
-                .catch(error => {
-                    console.error('There was a problem with the fetch operation:', error);
-                });
-        };
-
-
-        // 上一天按钮点击事件
-        document.getElementById('prevDayButton').addEventListener('click', function() {
-            if (currentDate > 1) {
-                currentDate--;
-                updateDayLabel();
-                if(route != null)
-                    getRoute(route.get(currentDate), city);
-            }
-        });
-
-        // 下一天按钮点击事件
-        document.getElementById('nextDayButton').addEventListener('click', function() {
-            if(currentDate < day_times){
-                currentDate++;
-                updateDayLabel();
-                if(route != null)
-                    getRoute(route.get(currentDate), city);
-            }
-            
-        });
-
-
-        // 更新日期标签的函数
-        function updateDayLabel() {
-            document.getElementById('dayLabel').textContent = `第${currentDate}天`;
-        }
-
-        function decodeJSON(jsonString) {
-            var route = new Map();
-            day_times = 0;
-            jsonString.forEach(item =>{
-                day_times++;
-                for (var day in item) {
-                    // 获取该天的活动列表
-                    var activities = item[day];
-                    // 遍历活动列表
-                    var a_plan = [];
-                    activities.forEach(function(activity) {
-                        console.log(activity['景点']);
-                        a_plan.push(activity['景点']);
-                    });
-                    var map = new Map();
-                    route.set(day_times,a_plan);
-                }
-            })
-            return route;
-        }
-
-
-        function getRoute(wayPoints, city) {
-            var routePoints = wayPoints.map(function (point) {
-                return { keyword: point, city: city };
-            });
-            for (var i = 0; i < routePoints.length; i++) {
-                log.success(routePoints[i]);
-            }
-
-            driving.search(routePoints, function (status, result) {
-                if (status === 'complete') {
-                    log.success('绘制驾车路线完成');
-                } else {
-                    log.error('获取驾车数据失败：' + result);
-                }
-            });
-        }
-
-    </script>
+    
 </body>
+<script type="text/javascript">
+    var day_times = 0;
+    var currentDate = 0;
+    var city = '';
+    var route = null;
+    var map = new AMap.Map("container", {
+        resizeEnable: true,
+        center: [116.397428, 39.90923],  //地图中心点
+        zoom: 13  //地图显示的缩放级别
+    });
 
+    var driving = new AMap.Driving({
+        map: map
+    });
+
+    document.getElementsByClassName("btn")[0].onclick = function () {
+        var zhongdian = document.getElementById("zhongdian").value;
+        var qidian = document.getElementById("start").value;
+        var tujingdian1 = document.getElementById("tujingdian1").value;
+        var tujingdian2 = document.getElementById("tujingdian2").value;
+        var city = document.getElementById("city").value;
+    };
+
+    // 控制面板的显示和隐藏
+    document.getElementById("togglePanelButton").onclick = function () {
+        var panel = document.getElementById("panel");
+        panel.classList.toggle("expanded"); // 切换面板的展开/收起状态
+
+        var buttonText = panel.classList.contains("expanded") ? "收起面板" : "展开面板";
+        this.innerText = buttonText;  // 切换按钮的文本
+    };
+
+    // 提交按钮的功能
+    document.getElementById("footerButton").onclick = function () {
+        var inputText = document.getElementById("footerText").value;
+        var passage = document.getElementById("iframeContainer");
+        passage.src = "passage.html";
+        // passage.contentWindow.location.reload();
+        fetch('http://127.0.0.1:5001/api/get-data?input=' + inputText, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();  // 解析为 JSON
+            })
+            .then(data => {
+                passage.contentWindow.postMessage(data, "*");
+                
+                city = data['城市'];
+                if(Array.isArray(data['计划'])){
+                    route = decodeJSON(data['计划']);
+                    getRoute(route.get(1), city);
+                    currentDate = 1;
+                    updateDayLabel();
+                }
+                else{
+                    alert("大模型未返回正确的JSON格式")
+                }
+            })
+            .catch(error => {
+                console.error('There was a problem with the fetch operation:', error);
+            });
+    };
+
+
+    // 上一天按钮点击事件
+    document.getElementById('prevDayButton').addEventListener('click', function() {
+        if (currentDate > 1) {
+            currentDate--;
+            updateDayLabel();
+            if(route != null)
+                getRoute(route.get(currentDate), city);
+        }
+    });
+
+    // 下一天按钮点击事件
+    document.getElementById('nextDayButton').addEventListener('click', function() {
+        if(currentDate < day_times){
+            currentDate++;
+            updateDayLabel();
+            if(route != null)
+                getRoute(route.get(currentDate), city);
+        }
+        
+    });
+
+
+    // 更新日期标签的函数
+    function updateDayLabel() {
+        document.getElementById('dayLabel').textContent = `第${currentDate}天`;
+    }
+
+    function decodeJSON(jsonString) {
+        var route = new Map();
+        day_times = 0;
+        jsonString.forEach(item =>{
+            day_times++;
+            for (var day in item) {
+                // 获取该天的活动列表
+                var activities = item[day];
+                // 遍历活动列表
+                var a_plan = [];
+                activities.forEach(function(activity) {
+                    console.log(activity['景点']);
+                    a_plan.push(activity['景点']);
+                });
+                var map = new Map();
+                route.set(day_times,a_plan);
+            }
+        })
+        return route;
+    }
+
+
+    function getRoute(wayPoints, city) {
+        var routePoints = wayPoints.map(function (point) {
+            return { keyword: point, city: city };
+        });
+        for (var i = 0; i < routePoints.length; i++) {
+            log.success(routePoints[i]);
+        }
+
+        driving.search(routePoints, function (status, result) {
+            if (status === 'complete') {
+                log.success('绘制驾车路线完成');
+            } else {
+                log.error('获取驾车数据失败：' + result);
+            }
+        });
+    }
+
+</script>
 </html>
