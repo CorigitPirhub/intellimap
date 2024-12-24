@@ -31,7 +31,7 @@ def post_data():
     city = data['城市']
     data = data['计划']
     num_images = 1  # 设置为1，只获取一张照片
-    save_dir = "images"
+    save_dir = "./images"
     delete_images(save_dir)
     for day in data:
         # 由于每个元素都是一个字典，并且只有一个键，我们可以这样获取键和值
@@ -59,7 +59,9 @@ def post_data():
     return jsonify(json_data)
 
 def delete_images(save_dir):
-     for filename in os.listdir(save_dir):
+    if not os.path.exists(save_dir):
+        return
+    for filename in os.listdir(save_dir):
         file_path = os.path.join(save_dir, filename)
         try:
             if os.path.isfile(file_path) or os.path.islink(file_path):
