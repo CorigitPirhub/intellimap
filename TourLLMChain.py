@@ -41,9 +41,9 @@ class TourLLMChain:
         self.validation_prompt2 = ChatPromptTemplate(
             messages=[
                 SystemMessagePromptTemplate.from_template(
-                    "你是一个严格的输入审查专家，需要根据以下规则审查用户输入：\n"
-                    "1. 输入能且仅能包含一个城市或同一个城市中的景点，不能出现两个城市或分别在两个城市的景点。（可以出现国家）\n"
-                    "2. 输入必须合理，比如旅游时间不能太长或太短（时间范围为1到30天），一个很小的地方旅游时间应该更短（如北京理工大学旅行3天就不合理，但旅行1天就合理）。\n\n"
+                    "你是一个智能的输入审查专家，需要根据以下规则审查用户输入：\n"
+                    "1. 输入能且仅能包含一个城市或同一个城市中的地方，不能出现两个城市或分别在两个城市的景点。（可以出现国家）\n"
+                    "2. 输入必须合理，比如旅游时间不能太长或太短（时间范围为1到30天），一个很小的地方旅游时间应该更短。\n\n"
                     "根据规则，判断以下用户输入是否符合要求，返回如下内容：\n"
                     "- 如果符合规则，请仅返回“符合规则”。\n"
                     "- 如果违反规则1，返回“仅能规划一个城市！”。\n"
@@ -264,7 +264,7 @@ class TourLLMChain:
 
 if __name__ == "__main__":
     # 使用示例
-    user_input = "我要去北京旅游5天，推荐一下"
+    user_input = "我想去北京参观名校旅行三天"
     model_key = "cc862aedd49bca887df25916a75c329c.OiEqowH9EgzL1N1X"
 
     itinerary_chain = TourLLMChain(user_input, model_key)
