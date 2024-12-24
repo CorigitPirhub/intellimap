@@ -5,6 +5,9 @@ from spider import get_image_urls, download_images
 from ScenicSpotProcessor import ScenicSpotProcessor
 import os
 import shutil
+import concurrent.futures
+import time  # 假设阻塞操作是sleep
+
 app = Flask(__name__)
 CORS(app) 
 
@@ -33,30 +36,42 @@ def post_data():
     num_images = 1  # 设置为1，只获取一张照片
     save_dir = "./images"
     delete_images(save_dir)
-    for day in data:
-        # 由于每个元素都是一个字典，并且只有一个键，我们可以这样获取键和值
-        day_key, day_value = next(iter(day.items()))
-
-        for attraction in day_value:
-            query = attraction['景点']
-            # 删除images下的所有文件
-           
-            image_urls = get_image_urls(query, num_images)
-            if image_urls:
-                download_images(image_urls, save_dir, query)  # 传入 j=0，因为只有一张照片
-                print("成功下载第一张图片！",query)
-                processor = ScenicSpotProcessor(api_key="cc862aedd49bca887df25916a75c329c.OiEqowH9EgzL1N1X")
-                description = processor.get_scenic_description(city, query)
-                this_data = {
-                    "景点": query,
-                    "图片": f"{save_dir}/image_{query}.jpg",
-                    "介绍": description
-                }
-                json_data.append(this_data)
-            else:
-                print("未找到任何图片。",query)
-            
+    with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
+        futures = []
+        for day in data:
+            # 由于每个元素都是一个字典，并且只有一个键，我们可以这样获取键和值
+            day_key, day_value = next(iter(day.items()))
+            for attraction in day_value:
+                query = attraction['景点']
+                future = executor.submit(get_spot_info, query,city,num_images,save_dir)
+                futures.append(future)
+        
+        # 等待所有任务完成
+        for future in concurrent.futures.as_completed(futures):
+            result = future.result()
+            json_data.append(result)
+    
     return jsonify(json_data)
+
+
+def get_spot_info(query,city,num_images,save_dir):
+    image_urls = get_image_urls(query, num_images)
+    if image_urls:
+        download_images(image_urls, save_dir, query)  # 传入 j=0，因为只有一张照片
+        print("成功下载第一张图片！",query)
+        processor = ScenicSpotProcessor(api_key="cc862aedd49bca887df25916a75c329c.OiEqowH9EgzL1N1X")
+        description = processor.get_scenic_description(city, query)
+        this_data = {
+            "景点": query,
+            "图片": f"{save_dir}/image_{query}.jpg",
+            "介绍": description
+        }
+        return this_data
+    else:
+        print("未找到任何图片。",query)
+        return None
+
+
 
 def delete_images(save_dir):
     if not os.path.exists(save_dir):
