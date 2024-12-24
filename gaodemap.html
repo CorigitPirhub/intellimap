@@ -201,7 +201,29 @@
             color: black;
         }
 
+        .loading-spinner {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3; /* Light gray */
+            border-top: 5px solid #3498db; /* Blue */
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            transform: translate(-50%, -50%);
+        }
 
+        /* 动画效果 */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .disabled-button {
+            background-color: #d3d3d3; /* 灰色背景 */
+            color: #a1a1a1; /* 灰色文本 */
+            cursor: not-allowed; /* 显示不可点击的样式 */
+        }
     </style>
 
     <script type="text/javascript">
@@ -284,39 +306,74 @@
 
     // 提交按钮的功能
     document.getElementById("footerButton").onclick = function () {
-        var inputText = document.getElementById("footerText").value;
-        var passage = document.getElementById("iframeContainer");
-        passage.src = "passage.html";
-        // passage.contentWindow.location.reload();
-        fetch('http://127.0.0.1:5001/api/get-data?input=' + inputText, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();  // 解析为 JSON
-            })
-            .then(data => {
-                passage.contentWindow.postMessage(data, "*");
-                
-                city = data['城市'];
-                if(Array.isArray(data['计划'])){
-                    route = decodeJSON(data['计划']);
-                    getRoute(route.get(1), city);
-                    currentDate = 1;
-                    updateDayLabel();
-                }
-                else{
-                    alert("大模型未返回正确的JSON格式")
+        // 禁用提交按钮，避免多次点击
+        var submitButton = document.getElementById("footerButton");
+        submitButton.disabled = true;
+        // 清空用户输入框的内容
+        var inputText = document.getElementById("footerText");
+        
+        if(inputText.value == "") {
+            alert("请输入一些文字");
+            submitButton.disabled = false;
+            return;
+        }
+        else {
+            // 显示加载动画
+            showLoadingSpinner();
+
+            var passage = document.getElementById("iframeContainer");
+            passage.src = "passage.html";
+            fetch('http://127.0.0.1:5001/api/get-data?input=' + inputText.value, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
                 }
             })
-            .catch(error => {
-                console.error('There was a problem with the fetch operation:', error);
-            });
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();  // 解析为 JSON
+                })
+                    .then(data => {
+                        passage.contentWindow.postMessage(data, "*");
+
+                        city = data['城市'];
+                        if (Array.isArray(data['计划'])) {
+                            route = decodeJSON(data['计划']);
+                            getRoute(route.get(1), city);
+                            currentDate = 1;
+                            updateDayLabel();
+                        } else {
+                            alert("大模型未返回正确的JSON格式");
+                        }
+                    })
+                    .catch(error => {
+                        console.error('There was a problem with the fetch operation:', error);
+                    })
+                    .finally(() => {
+                        // 恢复提交按钮并隐藏加载动画
+                        submitButton.disabled = false;
+                        inputText.value = "";
+                        hideLoadingSpinner();
+                    });
+        }
+    };
+
+    // 显示加载动画
+    function showLoadingSpinner() {
+        var spinner = document.createElement('div');
+        spinner.classList.add('loading-spinner');
+        spinner.id = 'loadingSpinner';
+        document.body.appendChild(spinner);
+    };
+
+    // 隐藏加载动画
+    function hideLoadingSpinner() {
+        var spinner = document.getElementById('loadingSpinner');
+        if (spinner) {
+            spinner.remove();
+        }
     };
 
 
