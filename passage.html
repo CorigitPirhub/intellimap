@@ -55,6 +55,34 @@
 <script>
     var scenicAreas = [];
 
+    // 渲染函数
+    function renderTravelPlan(data) {
+        console.log(data);
+        const container = document.getElementById('plan-container');
+        if(Array.isArray(data)) {
+            data.forEach(dayPlan => {
+                for (const [day, attractions] of Object.entries(dayPlan)) {
+                    const dayElement = document.createElement('div');
+                    dayElement.className = 'day-plan';
+                    dayElement.innerHTML = `<h2>${day}</h2>`;
+                    
+                    const attractionsList = document.createElement('ul');
+                    attractions.forEach(attraction => {
+                        const attractionItem = document.createElement('li');
+                        attractionItem.className = 'attraction';
+                        attractionItem.textContent = `${attraction.景点} -${attraction.时长}`;
+                        attractionsList.appendChild(attractionItem);
+                    });
+                    
+                    dayElement.appendChild(attractionsList);
+                    container.appendChild(dayElement);
+                }
+            });
+        }
+        else {
+            console.log("数据格式错误");
+        }
+    }
     // 动态渲染景点到页面的函数
     function renderScenicAreas() {
         var container = document.getElementById("scenic-areas-container");
@@ -98,7 +126,8 @@
     window.addEventListener("message", function (event) {
         var data = event.data;
         if (data) {
-            
+            var plan = data['计划'];
+            renderTravelPlan(plan)
             fetch('http://127.0.0.1:5001/api/post-data', {
                 method: 'POST',
                 headers: {
