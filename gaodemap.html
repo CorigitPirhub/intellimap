@@ -290,9 +290,8 @@
     document.getElementsByClassName("btn")[0].onclick = function () {
         var zhongdian = document.getElementById("zhongdian").value;
         var qidian = document.getElementById("start").value;
-        var tujingdian1 = document.getElementById("tujingdian1").value;
-        var tujingdian2 = document.getElementById("tujingdian2").value;
-        var city = document.getElementById("city").value;
+        var thisRoute = [qidian, zhongdian];
+        getRoute(thisRoute, "");
     };
 
     // 控制面板的显示和隐藏
