@@ -5,6 +5,7 @@ from PyQt6.QtWebEngineWidgets import QWebEngineView
 from PyQt6.QtWebEngineCore import QWebEngineSettings, QWebEngineProfile
 from PyQt6.QtCore import QUrl, Qt
 from PyQt6.QtWidgets import QApplication
+from PyQt6.QtGui import QIcon
 from backend import start_server
 from multiprocessing import Process
 
@@ -25,6 +26,8 @@ if __name__ == '__main__':
     server_process.start()
 
     app = QApplication(sys.argv)
+    icon_path = './icon/icon.png'  # 确保图标文件存在
+    app.setWindowIcon(QIcon(icon_path))
 
     signal.signal(signal.SIGINT, signal.SIG_DFL)
 
@@ -40,6 +43,7 @@ if __name__ == '__main__':
     profile.setHttpCacheMaximumSize(100000000) # 100MB
     app.setAttribute(Qt.ApplicationAttribute.AA_UseOpenGLES,True)
     browser = MyWebEngineView()
+    browser.setWindowTitle('智行 IntelliMap')
     browser.settings().setAttribute(QWebEngineSettings.WebAttribute.LocalContentCanAccessRemoteUrls, True)
     browser.settings().setAttribute(QWebEngineSettings.WebAttribute.LocalContentCanAccessFileUrls, True)
     browser.settings().setAttribute(QWebEngineSettings.WebAttribute.JavascriptEnabled, True)
