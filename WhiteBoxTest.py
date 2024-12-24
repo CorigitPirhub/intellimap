@@ -27,9 +27,12 @@ try:
     test_chain = TestLLMChain(model_key)
 
     # 执行测试生成用例
-    invalid_seeds, invalid_variants = test_chain.generate_test_cases(
+    invalid_seeds, invalid_variants = test_chain.generate_seeds_and_variants(
         test_chain.invalid_seed_chain, test_chain.invalid_variant_chain, "无效测试用例"
     )
+    # invalid_seeds, invalid_variants = test_chain.generate_seeds_and_variants(
+    #     test_chain.valid_seed_chain, test_chain.valid_variant_chain, "有效测试用例"
+    # )
     print(invalid_seeds)
     print(invalid_variants)
     combined = invalid_seeds + invalid_variants
