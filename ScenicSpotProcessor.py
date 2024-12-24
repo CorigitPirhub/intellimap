@@ -27,7 +27,6 @@ if __name__ == "__main__":
     json_data = [
         {"城市": "北京", "景点": "天安门"},
     ]
-
     # 初始化类并处理景点
     processor = ScenicSpotProcessor(api_key="cc862aedd49bca887df25916a75c329c.OiEqowH9EgzL1N1X")
     print(processor.get_scenic_description("北京", "天安门"))
