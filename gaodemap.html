@@ -306,59 +306,67 @@
 
     // 提交按钮的功能
     document.getElementById("footerButton").onclick = function () {
-        // 禁用提交按钮，避免多次点击
-        var submitButton = document.getElementById("footerButton");
-        submitButton.disabled = true;
-        // 清空用户输入框的内容
-        var inputText = document.getElementById("footerText");
-        
-        if(inputText.value == "") {
-            alert("请输入一些文字");
-            submitButton.disabled = false;
-            return;
-        }
-        else {
-            // 显示加载动画
-            showLoadingSpinner();
+    // 禁用提交按钮，避免多次点击
+    var submitButton = document.getElementById("footerButton");
+    submitButton.disabled = true;
+    // 修改按钮颜色为灰色
+    submitButton.style.backgroundColor = 'gray';
 
-            var passage = document.getElementById("iframeContainer");
-            passage.src = "passage.html";
-            fetch('http://127.0.0.1:5001/api/get-data?input=' + inputText.value, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
+    // 清空用户输入框的内容
+    var inputText = document.getElementById("footerText");
+    
+    if(inputText.value == "") {
+        alert("请输入一些文字");
+        submitButton.disabled = false;
+        // 如果输入为空，恢复按钮颜色
+        submitButton.style.backgroundColor = '';
+        return;
+    }
+    else {
+        // 显示加载动画
+        showLoadingSpinner();
+
+        var passage = document.getElementById("iframeContainer");
+        passage.src = "passage.html";
+        fetch('http://127.0.0.1:5001/api/get-data?input=' + inputText.value, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
                 }
+                return response.json();  // 解析为 JSON
             })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();  // 解析为 JSON
-                })
-                    .then(data => {
-                        passage.contentWindow.postMessage(data, "*");
+                .then(data => {
+                    passage.contentWindow.postMessage(data, "*");
 
-                        city = data['城市'];
-                        if (Array.isArray(data['计划'])) {
-                            route = decodeJSON(data['计划']);
-                            getRoute(route.get(1), city);
-                            currentDate = 1;
-                            updateDayLabel();
-                        } else {
-                            alert("大模型未返回正确的JSON格式");
-                        }
-                    })
-                    .catch(error => {
-                        console.error('There was a problem with the fetch operation:', error);
-                    })
-                    .finally(() => {
-                        // 恢复提交按钮并隐藏加载动画
-                        submitButton.disabled = false;
-                        inputText.value = "";
-                        hideLoadingSpinner();
-                    });
+                    city = data['城市'];
+                    if (Array.isArray(data['计划'])) {
+                        route = decodeJSON(data['计划']);
+                        getRoute(route.get(1), city);
+                        currentDate = 1;
+                        updateDayLabel();
+                    } else {
+                        alert("大模型未返回正确的JSON格式");
+                    }
+                })
+                .catch(error => {
+                    console.error('There was a problem with the fetch operation:', error);
+                })
+                .finally(() => {
+                    // 恢复提交按钮并隐藏加载动画
+                    submitButton.disabled = false;
+                    // 恢复按钮颜色
+                    submitButton.style.backgroundColor = '';
+                    inputText.value = "";
+                    hideLoadingSpinner();
+                });
         }
     };
+
 
     // 显示加载动画
     function showLoadingSpinner() {
